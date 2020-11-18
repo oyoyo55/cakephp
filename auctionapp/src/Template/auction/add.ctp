@@ -8,6 +8,7 @@
         echo $this->Form->control('name');
         echo $this->Form->control('detail', ['type' => 'textarea']);
         echo $this->Form->control('image', ['type' => 'file']);
+        echo $this->Flash->render('img');
         echo $this->Form->hidden('finished', ['value' => 0]);
         echo $this->Form->control('endtime');
     ?>
