@@ -87,26 +87,42 @@ class AuctionController extends AuctionBaseController
         // POST送信時の処理
         if ($this->request->is('post')) {
             $imgFile = $this->request->getData('image');
-            $fileType = ['gif', 'jpg', 'png'];
-            // 画像ファイルの拡張子を切り抜く
+            // 画像のvaridateに使用する拡張子をリクエストファイルから切り抜く
+            $fileType = ['jpg', 'gif', 'png'];
             $ext = pathinfo($imgFile['name'], PATHINFO_EXTENSION);
-            // 画像名をユニーク化する
-            $imgName = sha1(uniqid(rand(), 1)).'.'.$ext;
-            // webroot下へ画像ファイルを保存する
-            move_uploaded_file($imgFile['tmp_name'], '../webroot/img/'.$imgName);
-
-            // $biditemにフォームの送信内容を反映
-            $biditem = $this->Biditems->patchEntity($biditem, $this->request->getData());
-            $biditem['image '] = $imgName;
-            // $biditemを保存する
-            if ($this->Biditems->save($biditem)) {
-                // 成功時のメッセージ
-                $this->Flash->success(__('保存しました。'));
-                // トップページ（index）に移動
-                return $this->redirect(['action' => 'index']);
+            // バリデーションを行う。エラーが起きたらcatchへ飛ばす
+            try {
+                // 画像ファイルであるかバリデーション
+                if (!in_array($ext, $fileType)) {
+                    $errorMessage[] = '※画像ファイルを選んでください。';
+                }
+                // 10MB以下の画像であるかバリデーション
+                if ($imgFile['size'] > 10485760) {
+                    $errorMessage[] = '※10MB以下の画像ファイルを選んでください。';
+                }
+                // バリデーションエラーがあれば、catchへ飛ばす
+                if (!empty($errorMessage)) {
+                    throw new Exception();
+                }
+                // ファイル名をユニーク化し、webrootへ保存
+                $imgName = sha1(uniqid(rand(), 1)).'.'.$ext;
+                move_uploaded_file($imgFile['tmp_name'], '../webroot/img/'.$imgName);
+                // 商品情報をBIditemに保存
+                $biditem = $this->Biditems->patchEntity($biditem, $this->request->getData());
+                $biditem['image'] = $imgName;
+                if ($this->Biditems->save($biditem)) {
+                    // 成功時のメッセージ
+                    $this->Flash->success(__('保存しました。'));
+                    return $this->redirect(['action' => 'index']);
+                }
+                // 失敗時のエラーメッセージ
+                $this->Flash->error(__('保存に失敗しました。もう一度入力ください。'));
+            } catch (Exception $e) {
+                // バリデーションエラーメッセージを取得
+                foreach ($errorMessage as $message) {
+                    $this->Flash->error($message, ['key'=>'img']);
+                }
             }
-            // 失敗時のメッセージ
-            $this->Flash->error(__('保存に失敗しました。もう一度入力下さい。'));
         }
         // 値を保管
         $this->set(compact('biditem'));
