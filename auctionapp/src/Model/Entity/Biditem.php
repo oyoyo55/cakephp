@@ -32,6 +32,8 @@ class Biditem extends Entity
     protected $_accessible = [
         'user_id' => true,
         'name' => true,
+        'detail' => true,
+        'image' => true,
         'finished' => true,
         'endtime' => true,
         'created' => true,
