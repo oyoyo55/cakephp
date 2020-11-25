@@ -22,14 +22,13 @@
 </tr>
 <tr>
     <th scope="row">商品詳細</th>
-    <td><?= h($biditem->detail) ?></td>
+    <td><?= nl2br(h($biditem->detail)) ?></td>
 </tr>
 <tr>
     <th scope="row">商品画像</th>
     <td><?= $this->Html->image($biditem->image, array('width'=>350, 'height'=>300)) ?>
 </tr>
 </table>
-
 
 <div class="related">
     <h4><?= __('落札情報') ?></h4>
