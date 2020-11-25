@@ -37,7 +37,7 @@ class UsersController extends AppController
                 'action' => 'login'
             ],
             'logoutRedirect' => [
-                'cotroller' => 'Users',
+                'controller' => 'Users',
                 'action' => 'logout',
             ],
             'authError' => 'ログインしてください。',
