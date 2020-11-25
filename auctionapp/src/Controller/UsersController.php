@@ -32,7 +32,7 @@ class UsersController extends AppController
                     ]
                 ]
             ],
-            'loginRdirect' => [
+            'loginRedirect' => [
                 'controller' => 'Users',
                 'action' => 'login'
             ],
