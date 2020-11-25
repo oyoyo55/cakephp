@@ -2,7 +2,7 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
-
+use Cake\Datasource\ConnectionManager; // added.
 use Cake\Event\Event; // added.
 use Exception; // added.
 
@@ -82,6 +82,8 @@ class AuctionController extends AuctionBaseController
     // 出品する処理
     public function add()
     {
+        // トランザクションを設定
+        $connection = ConnectionManager::get('default');
         // Biditemインスタンスを用意
         $biditem = $this->Biditems->newEntity();
         // POST送信時の処理
@@ -90,6 +92,8 @@ class AuctionController extends AuctionBaseController
             // 画像のvaridateに使用する拡張子をリクエストファイルから切り抜く
             $fileType = ['jpg', 'gif', 'png'];
             $ext = pathinfo($imgFile['name'], PATHINFO_EXTENSION);
+            // トランザクション開始
+            $connection->begin();
             // バリデーションを行う。エラーが起きたらcatchへ飛ばす
             try {
                 // 画像ファイルであるかバリデーション
@@ -113,6 +117,8 @@ class AuctionController extends AuctionBaseController
                 if ($this->Biditems->save($biditem)) {
                     // 成功時のメッセージ
                     $this->Flash->success(__('保存しました。'));
+                    // コミット
+                    $connection->commit();
                     return $this->redirect(['action' => 'index']);
                 }
                 // 失敗時のエラーメッセージ
@@ -122,6 +128,8 @@ class AuctionController extends AuctionBaseController
                 foreach ($errorMessage as $message) {
                     $this->Flash->error($message, ['key'=>'img']);
                 }
+                // ロールバック
+                $connection->rollback();
             }
         }
         // 値を保管
@@ -134,11 +142,11 @@ class AuctionController extends AuctionBaseController
         // 入札用のBidrequestインスタンスを用意
         $bidrequest = $this->Bidrequests->newEntity();
         // $bidrequestにbiditem_idとuser_idを設定
-        $bidrequest->biditem_id = $$biditem_id;
+        $bidrequest->biditem_id = $biditem_id;
         $bidrequest->user_id = $this->Auth->user('id');
         // POST送信時の処理
         if ($this->request->is('post')) {
-            // bidrequestに送信フォームの内容を反映する
+            // $bidrequestに送信フォームの内容を反映する
             $bidrequest = $this->Bidrequests->patchEntity($bidrequest, $this->request->getData());
             // Bidrequestを保存
             if ($this->Bidrequests->save($bidrequest)) {
