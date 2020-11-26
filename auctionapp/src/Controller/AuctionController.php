@@ -92,6 +92,8 @@ class AuctionController extends AuctionBaseController
             // 画像のvaridateに使用する拡張子をリクエストファイルから切り抜く
             $fileType = ['jpg', 'gif', 'png'];
             $ext = pathinfo($imgFile['name'], PATHINFO_EXTENSION);
+            // 画像名をユニーク化
+            $imgName = sha1(uniqid(rand(), 1)).'.'.$ext;
             // トランザクション開始
             $connection->begin();
             // バリデーションを行う。エラーが起きたらcatchへ飛ばす
@@ -104,13 +106,14 @@ class AuctionController extends AuctionBaseController
                 if ($imgFile['size'] > 10485760) {
                     $errorMessage[] = '※10MB以下の画像ファイルを選んでください。';
                 }
+                // 画像保存の処理
+                if (!move_uploaded_file($imgFile['tmp_name'], '../webroot/img/'.$imgName)) {
+                    $errorMessage[] = '※画像の保存に失敗しました。';
+                }
                 // バリデーションエラーがあれば、catchへ飛ばす
                 if (!empty($errorMessage)) {
                     throw new Exception();
                 }
-                // ファイル名をユニーク化し、webrootへ保存
-                $imgName = sha1(uniqid(rand(), 1)).'.'.$ext;
-                move_uploaded_file($imgFile['tmp_name'], '../webroot/img/'.$imgName);
                 // 商品情報をBIditemに保存
                 $biditem = $this->Biditems->patchEntity($biditem, $this->request->getData());
                 $biditem['image'] = $imgName;
