@@ -96,6 +96,8 @@ class AuctionController extends AuctionBaseController
             $imgName = sha1(uniqid(rand(), 1)).'.'.$ext;
             // トランザクション開始
             $connection->begin();
+            // 配列の初期化
+            $errorMessage =[];
             // バリデーションを行う。エラーが起きたらcatchへ飛ばす
             try {
                 // 画像ファイルであるかバリデーション
@@ -107,7 +109,7 @@ class AuctionController extends AuctionBaseController
                     $errorMessage[] = '※10MB以下の画像ファイルを選んでください。';
                 }
                 // 画像保存の処理
-                if (!move_uploaded_file($imgFile['tmp_name'], '../webroot/img/'.$imgName)) {
+                if (!move_uploaded_file($imgFile['tmp_name'], 'WWW_ROOT'.$imgName)) {
                     $errorMessage[] = '※画像の保存に失敗しました。';
                 }
                 // バリデーションエラーがあれば、catchへ飛ばす
