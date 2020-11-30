@@ -94,6 +94,8 @@ class AuctionController extends AuctionBaseController
             $ext = pathinfo($imgFile['name'], PATHINFO_EXTENSION);
             // 画像名をユニーク化
             $imgName = sha1(uniqid(rand(), 1)).'.'.$ext;
+            // 画像の保存先パス
+            $filePath = WWW_ROOT . DS . "img" . DS;
             // トランザクション開始
             $connection->begin();
             // 配列の初期化
@@ -109,7 +111,7 @@ class AuctionController extends AuctionBaseController
                     $errorMessage[] = '※10MB以下の画像ファイルを選んでください。';
                 }
                 // 画像保存の処理
-                if (!move_uploaded_file($imgFile['tmp_name'], 'WWW_ROOT'.$imgName)) {
+                if (!move_uploaded_file($imgFile['tmp_name'], $filePath.$imgName)) {
                     $errorMessage[] = '※画像の保存に失敗しました。';
                 }
                 // バリデーションエラーがあれば、catchへ飛ばす
