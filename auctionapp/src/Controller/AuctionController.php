@@ -130,6 +130,7 @@ class AuctionController extends AuctionBaseController
                 }
                 // 失敗時のエラーメッセージ
                 $this->Flash->error(__('保存に失敗しました。もう一度入力ください。'));
+                $connection->rollback();
             } catch (Exception $e) {
                 // バリデーションエラーメッセージを取得
                 foreach ($errorMessage as $message) {
